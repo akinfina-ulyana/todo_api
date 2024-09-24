@@ -1,13 +1,21 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from api.models import Task, Category
+from api.models import Task, Category, Priority
 
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)  #  поле только для записи
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'password']
+
+    def create(self, validated_data):
+        user = User(**validated_data)
+        user.set_password(validated_data['password'])  # Сохраняем пароль в зашифрованном виде
+        user.save()
+        return user
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,4 +30,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
+class PrioritySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Priority
+        fields = '__all__'
