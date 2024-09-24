@@ -1,6 +1,7 @@
 from datetime import timezone
 
-from django.contrib.auth import authenticate, login, logout
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 from django.utils.crypto import get_random_string
 from rest_framework import generics, status, viewsets, permissions
 from django.contrib.auth.models import User
@@ -8,9 +9,36 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Task, Category
-from .serializers import UserSerializer, TaskSerializer, CategorySerializer
+from .models import Task, Category, Priority
+from .serializers import UserSerializer, TaskSerializer, CategorySerializer, PrioritySerializer
 
+
+class UserCreate(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()  # Создание пользователя
+        return Response({'username': user.username}, status=status.HTTP_201_CREATED)
+
+class CustomAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key}, status=status.HTTP_200_OK)
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        request.user.auth_token.delete()  # Удаляем токен
+        return Response(status=status.HTTP_200_OK)
 
 # ---------------------------- User API ----------------------------
 # Получить всех пользователей
@@ -165,6 +193,26 @@ class CategoryViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+
+class PriorityViewSet(viewsets.ModelViewSet):
+    queryset = Priority.objects.filter(deleted=False)
+    serializer_class = PrioritySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        # Логика для мягкого удаления
+        instance.deleted = True
+        instance.deleted_at = timezone.now()
+        instance.save()
+
+    def delete(self, request, pk=None):
+        priority = self.get_object()
+        if request.user.is_admin:  # Проверка для жесткого удаления
+            priority.delete()  # Жесткое удаление
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            self.perform_destroy(priority)  # Мягкое удаление
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
