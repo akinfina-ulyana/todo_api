@@ -4,31 +4,33 @@ from .views import UserViewSet, UserDetail, TaskCreateView, ChangePasswordView, 
     CategoryViewSet, PriorityViewSet, CustomAuthToken, LogoutView, UserCreate
 
 urlpatterns = [
+
     path('register/', UserCreate.as_view(), name='user-register'),
     path('api-token-auth/', CustomAuthToken.as_view(), name='api-token-auth'),
     path('api/logout/', LogoutView.as_view(), name='logout'),
 
     path('users/', UserViewSet.as_view(), name='user-list'),  # все пользователи GET http://127.0.0.1:8000/api/v1/users/
     path('users/<int:pk>/', UserDetail.as_view(), name='user-detail'),  # GET http://127.0.0.1:8000/api/v1/users/3/
-    path('change-password/', ChangePasswordView.as_view(), name='change_password'),
+
+    path('change-password/', ChangePasswordView.as_view(), name='change-password'),
     # POST http://127.0.0.1:8000/api/v1/change-password/
-    path('reset-password/', ResetPasswordView.as_view(), name='reset_password'),
+    path('reset-password/', ResetPasswordView.as_view(), name='reset-password'),
     # POST http://127.0.0.1:8000/api/v1/reset-password/
 
-    path('create_task/', TaskCreateView.as_view(), name='create_task'),
+    path('create_task/', TaskCreateView.as_view(), name='create-task'),
     # POST http://127.0.0.1:8000/api/v1/create_task/
-    path('tasks/', UserTasksView.as_view(), name='user_tasks'),  # GET http://127.0.0.1:8000/api/v1/create_task/
-    path('tasks/status/', TasksByStatusView.as_view(), name='tasks_by_status'),
+    path('tasks/', UserTasksView.as_view(), name='user-tasks'),  # GET http://127.0.0.1:8000/api/v1/create_task/
+    path('tasks/status/', TasksByStatusView.as_view(), name='tasks-by-status'),
     # GET http://127.0.0.1:8000/api/v1/tasks/status/?status=pending
-    path('tasks/category/', TasksByCategoryView.as_view(), name='tasks_by_category'),
+    path('tasks/category/', TasksByCategoryView.as_view(), name='tasks-by-category'),
     # GET http://127.0.0.1:8000/api/v1/tasks/category/?category=1
-    path('tasks/priority/', TasksByPriorityView.as_view(), name='tasks_by_priority'),
+    path('tasks/priority/', TasksByPriorityView.as_view(), name='tasks-by-priority'),
     # GET http://127.0.0.1:8000/api/v1/tasks/priority/?priority=1
-    path('tasks/<int:pk>/', UserTaskDetailView.as_view(), name='user_task_detail'),
+    path('tasks/<int:pk>/', UserTaskDetailView.as_view(), name='user-task-detail'),
     # GET http://127.0.0.1:8000/api/v1/tasks/1/
-    path('tasks/<int:pk>/update/', TaskUpdateView.as_view(), name='task_update'),
+    path('tasks/<int:pk>/update/', TaskUpdateView.as_view(), name='task-update'),
     # PUT http://127.0.0.1:8000/api/v1/tasks/1/update/
-    path('tasks/<int:pk>/delete/', TaskDeleteView.as_view(), name='task_delete'),
+    path('tasks/<int:pk>/delete/', TaskDeleteView.as_view(), name='task-delete'),
     # DELETE http://127.0.0.1:8000/api/v1/tasks/1/delete/
 
     path('categories/', CategoryViewSet.as_view({'post': 'create'}), name='category-create'),

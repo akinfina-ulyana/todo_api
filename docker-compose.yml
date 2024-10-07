@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+
+  postgres:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_DB: todo_api
+      POSTGRES_USER: todo_api
+      POSTGRES_PASSWORD: todo_api
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+    environment:
+      DEBUG: "False"
+      DB_NAME: "todo_api"
+      DB_USER: "todo_api"
+      DB_PASSWORD: "todo_api"
+      DB_HOST: "postgres"
+      DB_PORT: 5432
+
